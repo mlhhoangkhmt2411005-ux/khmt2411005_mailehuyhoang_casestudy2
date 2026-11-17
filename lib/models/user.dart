@@ -2,27 +2,21 @@ class User {
   final String id;
   final String fullName;
   final String email;
-  final String? avatarUrl;
-  final DateTime? createdAt;
-  final DateTime? updatedAt;
+  final String avatarUrl;
 
   User({
     required this.id,
     required this.fullName,
     required this.email,
-    this.avatarUrl,
-    this.createdAt,
-    this.updatedAt,
+    this.avatarUrl = '',
   });
 
   factory User.fromJson(Map<String, dynamic> json) {
     return User(
-      id: json['_id'] ?? json['id'] ?? '',
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
       fullName: json['fullName'] ?? '',
       email: json['email'] ?? '',
-      avatarUrl: json['avatarUrl'],
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      avatarUrl: json['avatarUrl'] ?? '',
     );
   }
 
@@ -32,8 +26,6 @@ class User {
       'fullName': fullName,
       'email': email,
       'avatarUrl': avatarUrl,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
     };
   }
 }

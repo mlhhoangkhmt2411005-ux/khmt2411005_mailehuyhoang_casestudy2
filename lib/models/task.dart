@@ -6,11 +6,11 @@ class Task {
   final String description;
   final User? createdBy;
   final List<User> assignees;
-  final User? primaryAssignee;
+  final String? primaryAssigneeId;
   final DateTime? startDate;
   final DateTime? dueDate;
-  final String priority; // low, medium, high
-  final String status; // todo, in_progress, completed
+  final String priority; // 'low', 'medium', 'high'
+  final String status;   // 'todo', 'in_progress', 'completed'
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -19,8 +19,8 @@ class Task {
     required this.title,
     required this.description,
     this.createdBy,
-    required this.assignees,
-    this.primaryAssignee,
+    this.assignees = const [],
+    this.primaryAssigneeId,
     this.startDate,
     this.dueDate,
     required this.priority,
@@ -30,44 +30,39 @@ class Task {
   });
 
   factory Task.fromJson(Map<String, dynamic> json) {
-    var assigneesList = <User>[];
-    if (json['assignees'] != null) {
-      assigneesList = (json['assignees'] as List)
-          .map((item) => item is Map<String, dynamic> ? User.fromJson(item) : User(id: item.toString(), fullName: '', email: ''))
-          .toList();
-    }
-
     User? creator;
     if (json['createdBy'] != null) {
-      if (json['createdBy'] is Map<String, dynamic>) {
-        creator = User.fromJson(json['createdBy']);
+      if (json['createdBy'] is Map) {
+        creator = User.fromJson(Map<String, dynamic>.from(json['createdBy']));
       } else {
         creator = User(id: json['createdBy'].toString(), fullName: '', email: '');
       }
     }
 
-    User? primary;
-    if (json['primaryAssignee'] != null) {
-      if (json['primaryAssignee'] is Map<String, dynamic>) {
-        primary = User.fromJson(json['primaryAssignee']);
-      } else {
-        primary = User(id: json['primaryAssignee'].toString(), fullName: '', email: '');
+    List<User> assigneeList = [];
+    if (json['assigneeIds'] != null && json['assigneeIds'] is List) {
+      for (var item in json['assigneeIds']) {
+        if (item is Map) {
+          assigneeList.add(User.fromJson(Map<String, dynamic>.from(item)));
+        } else if (item != null) {
+          assigneeList.add(User(id: item.toString(), fullName: '', email: ''));
+        }
       }
     }
 
     return Task(
-      id: json['_id'] ?? json['id'] ?? '',
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
       title: json['title'] ?? '',
       description: json['description'] ?? '',
       createdBy: creator,
-      assignees: assigneesList,
-      primaryAssignee: primary,
-      startDate: json['startDate'] != null ? DateTime.tryParse(json['startDate']) : null,
-      dueDate: json['dueDate'] != null ? DateTime.tryParse(json['dueDate']) : null,
+      assignees: assigneeList,
+      primaryAssigneeId: json['primaryAssigneeId']?.toString(),
+      startDate: json['startDate'] == null ? null : DateTime.tryParse(json['startDate'].toString()),
+      dueDate: json['dueDate'] == null ? null : DateTime.tryParse(json['dueDate'].toString()),
       priority: json['priority'] ?? 'medium',
       status: json['status'] ?? 'todo',
-      createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt']) : null,
-      updatedAt: json['updatedAt'] != null ? DateTime.tryParse(json['updatedAt']) : null,
+      createdAt: json['createdAt'] == null ? null : DateTime.tryParse(json['createdAt'].toString()),
+      updatedAt: json['updatedAt'] == null ? null : DateTime.tryParse(json['updatedAt'].toString()),
     );
   }
 
@@ -76,15 +71,36 @@ class Task {
       'id': id,
       'title': title,
       'description': description,
-      'createdBy': createdBy?.toJson(),
-      'assignees': assignees.map((e) => e.toJson()).toList(),
-      'primaryAssignee': primaryAssignee?.toJson(),
-      'startDate': startDate?.toIso8601String(),
-      'dueDate': dueDate?.toIso8601String(),
       'priority': priority,
       'status': status,
-      'createdAt': createdAt?.toIso8601String(),
-      'updatedAt': updatedAt?.toIso8601String(),
+      'startDate': startDate?.toIso8601String(),
+      'dueDate': dueDate?.toIso8601String(),
     };
+  }
+
+  static String statusLabel(String status) {
+    switch (status) {
+      case 'todo':
+        return 'Chưa thực hiện';
+      case 'in_progress':
+        return 'Đang thực hiện';
+      case 'completed':
+        return 'Đã hoàn thành';
+      default:
+        return status;
+    }
+  }
+
+  static String priorityLabel(String priority) {
+    switch (priority) {
+      case 'low':
+        return 'Thấp';
+      case 'medium':
+        return 'Trung bình';
+      case 'high':
+        return 'Cao';
+      default:
+        return priority;
+    }
   }
 }
