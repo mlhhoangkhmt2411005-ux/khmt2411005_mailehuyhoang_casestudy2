@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../../services/auth_service.dart';
 import '../../utils/validators.dart';
+import '../tasks/task_list_screen.dart';
 import 'register_screen.dart';
 
 class LoginScreen extends StatefulWidget {
@@ -23,8 +24,9 @@ class _LoginScreenState extends State<LoginScreen> {
       try {
         await AuthService.login(_emailController.text.trim(), _passwordController.text);
         if (!mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Đăng nhập thành công!')),
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const TaskListScreen()),
         );
       } catch (e) {
         if (!mounted) return;
